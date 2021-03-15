@@ -45,7 +45,6 @@ class Processor {
 				} else {
 					
 					$salesman = new Salesman($item[1], $item[2], $item[3]);
-					
 					if ( !empty( $salesman->getErrors() ) ) {
 						
 						foreach ($salesman->getErrors() as $error) {
@@ -87,48 +86,52 @@ class Processor {
 				}
 				break;
 			
-//			// Sale
-//			case '003':
-//
-//				$salesStart = strpos($line, '[') + 1;
-//				$salesEnd = strpos( $line, ']') - $salesStart;
-//
-//				$saleItemsLine = substr( $line, $salesStart, $salesEnd);
-//				$saleItemsList = $this->processSaleItems( $saleItemsLine );
-//
-//				// Reprocessando a linha sem os itens, na falta de opção melhor atualmente
-//
-//				$newline = str_replace($saleItemsLine, '', $line);
-//
-//				$item = explode( ',', $newline);
-//
-//				if ( count( $item ) != 4) {
-//
-//					$this->setFailedLine($line, 'O registro não está no formato esperado.');
-//
-//				} else {
-//
-//					$sale = new Sale($item[1], $saleItemsList, $item[3] );
-//
-//					if ( !empty($sale->getErrors() ) ) {
-//
-//						foreach ($sale->getErrors() as $error) {
-//							$this->setFailedLine($line, $error);
-//						}
-//
-//					} elseif ( !$this->saleslmanExists( $item[3] ) ) {
-//
-//						$this->setFailedLine($line, 'O vendedor ' . $item[3] . ' informado não está cadastrado no sistema');
-//
-//					} else {
-//
-//						array_push($this->salesList, $sale);
-//
-//					}
-//
-//				}
-//
-//				break;
+			// Sale
+			case '003':
+
+				$salesStart = strpos($line, '[') + 1;
+				$salesEnd = strpos( $line, ']') - $salesStart;
+
+				$saleItemsLine = substr( $line, $salesStart, $salesEnd);
+				$saleItemsList = $this->processSaleItems( $saleItemsLine );
+
+				// Reprocessando a linha sem os itens, na falta de opção melhor atualmente
+				$newline = str_replace($saleItemsLine, '', $line);
+				$item = explode( ',', $newline);
+
+				if ( count( $item ) != 4) {
+
+					$this->setFailedLine($line, 'O registro não está no formato esperado.');
+
+				} elseif ( !strpos( $line, '[') || !strpos( $line, ']') ) {
+					
+					$this->setFailedLine($line, 'As vendas não foram informadas corretamente.');
+					
+				}
+				
+				else {
+
+					$sale = new Sale($item[1], $saleItemsList, $item[3] );
+
+					if ( !empty($sale->getErrors() ) ) {
+
+						foreach ($sale->getErrors() as $error) {
+							$this->setFailedLine($line, $error);
+						}
+
+					} elseif ( !$this->saleslmanExists( $item[3] ) ) {
+
+						$this->setFailedLine($line, 'O vendedor ' . $item[3] . ' não está cadastrado no sistema');
+
+					} else {
+
+						array_push($this->salesList, $sale);
+
+					}
+
+				}
+
+				break;
 			
 			default:
 				
@@ -183,6 +186,10 @@ class Processor {
 		return $this->getSalesmenQuantity() == 0 ? 0 : $this->salesmenSalarySum / $this->getSalesmenQuantity();
 	}
 	
+	private function getMostExpensiveSale() : float {
+		return $this->getSalesmenQuantity() == 0 ? 0 : $this->mostExpensiveSale;
+	}
+	
 	public function getProcessReport() : string {
 		
 		$report = '|RELATÓRIO|
@@ -214,9 +221,9 @@ Linhas não processadas: ' . count( $this->failedLines ) . '
 		}
 		
 		// DEBUG! REMOVER OU COMENTAR!!!!
-		echo '<pre>' . $report;
-		
-		dd( $this->salesList);
+//		echo '<pre>' . $report;
+//
+//		dd( $this->salesList);
 		
 		return $report;
 	

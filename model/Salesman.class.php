@@ -6,7 +6,7 @@ class Salesman extends Model {
 
 	private $cpf = '';
 	private $name = '';
-	private $salary;
+	private $salary = 0.0;
 	
 	
 	public function __construct( $cpf, $name, $salary ) {

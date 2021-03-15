@@ -13,7 +13,7 @@ if ( $_GET['file'] ) {
 	$fileName = $_GET['file'];
 	$doneFileName = FileHandler::changeFileExtension($fileName, '.done.dat' );
 	
-	$processor = new Processor;
+	$processor = new Processor();
 	$processor->processFile( $readPath, $fileName );
 	
 	FileHandler::writeFile( $writePath, $doneFileName, 'w', $processor->getProcessReport() );
