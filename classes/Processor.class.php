@@ -3,6 +3,7 @@
 require_once MODEL_PATH . 'Salesman.class.php';
 require_once MODEL_PATH . 'Customer.class.php';
 require_once MODEL_PATH . 'Sale.class.php';
+require_once MODEL_PATH . 'SaleItem.class.php';
 	
 class Processor {
 	
@@ -14,12 +15,13 @@ class Processor {
 	private $mostExpensiveSale = 0;
 	private $worstSalesman = '';
 	
+	public $successLines = [];
 	public $failedLines = [];
 	
 	public function processFile( string $path, string $fileName ) : void {
 		
 		$lines = file( $path . $fileName);
-		sort( $lines ); // Ordenação para garantir que os vendedores sejam registrados antes da venda
+		sort( $lines ); // Ordenação para garantir que os vendedores sejam registrados antes das vendas
 		
 		foreach ( $lines as $line ) {
 		
@@ -31,111 +33,51 @@ class Processor {
 	
 	private function processLine( string $line ) : void {
 		
-		$item = explode( ',', $line);
+		// Busca nas o código de tipo de entidade nos primeiros 3 caracteres da linha
+		$code = substr( $line, 0, 3);
 		
-		switch ($item[0]) {
+		switch ( $code ) {
 			
 			// Salesman
 			case '001':
 				
-				if ( count( $item ) != 4) {
-					
-					$this->setFailedLine($line, 'O registro não está no formato esperado.');
-					
-				} else {
-					
-					$salesman = new Salesman($item[1], $item[2], $item[3]);
-					if ( !empty( $salesman->getErrors() ) ) {
-						
-						foreach ($salesman->getErrors() as $error) {
-							$this->setFailedLine($line, $error);
-						}
-						
-					} else {
-						
-						array_push($this->salesmenList, $salesman);
-						$this->salesmenSalarySum += $salesman->getSalary();
-						
-					}
-					
+				$salesman = $this->processSalesman( $line );
+				
+				if ( is_a( $salesman, 'Salesman' ) ) {
+					array_push( $this->successLines, $line);
+					array_push($this->salesmenList, $salesman);
+					$this->salesmenSalarySum += $salesman->getSalary();
 				}
+				
 				break;
 			
 			// Customer
 			case '002':
+
+				$customer = $this->processCustomer( $line );
 				
-				if ( count( $item ) != 4) {
-					
-					$this->setFailedLine($line, 'O registro não está no formato esperado.');
-					
-				} else {
-					
-					$customer = new Customer($item[1], $item[2], $item[3]);
-					
-					if ( !empty( $customer->getErrors() ) ) {
-						
-						array_push($this->customersList, $customer);
-						
-					} else {
-						
-						foreach ($customer->getErrors() as $error) {
-							$this->setFailedLine($line, $error);
-						}
-						
-					}
+				if ( is_a( $customer, 'Customer' ) ) {
+					array_push( $this->successLines, $line);
+					array_push($this->customersList, $customer);
 				}
+				
 				break;
-			
+
 			// Sale
 			case '003':
-
-				$salesStart = strpos($line, '[') + 1;
-				$salesEnd = strpos( $line, ']') - $salesStart;
-
-				$saleItemsLine = substr( $line, $salesStart, $salesEnd);
-				$saleItemsList = $this->processSaleItems( $saleItemsLine );
-
-				// Reprocessando a linha sem os itens, na falta de opção melhor atualmente
-				$newline = str_replace($saleItemsLine, '', $line);
-				$item = explode( ',', $newline);
-
-				if ( count( $item ) != 4) {
-
-					$this->setFailedLine($line, 'O registro não está no formato esperado.');
-
-				} elseif ( !strpos( $line, '[') || !strpos( $line, ']') ) {
-					
-					$this->setFailedLine($line, 'As vendas não foram informadas corretamente.');
-					
+				
+				$sale = $this->processSale( $line );
+				
+				if ( is_a( $sale, 'Sale' ) ) {
+					array_push( $this->successLines, $line);
+					array_push($this->salesList, $sale);
 				}
 				
-				else {
-
-					$sale = new Sale($item[1], $saleItemsList, $item[3] );
-
-					if ( !empty($sale->getErrors() ) ) {
-
-						foreach ($sale->getErrors() as $error) {
-							$this->setFailedLine($line, $error);
-						}
-
-					} elseif ( !$this->saleslmanExists( $item[3] ) ) {
-
-						$this->setFailedLine($line, 'O vendedor ' . $item[3] . ' não está cadastrado no sistema');
-
-					} else {
-
-						array_push($this->salesList, $sale);
-
-					}
-
-				}
-
 				break;
 			
 			default:
 				
-				// Se não for uma linha vazia, registra o erro
+				// Linhas vazias não são retornadas como erros, mas qualquer outra não aceita nos casos acima, sim
 				if( trim($line) != '')
 					$this->setFailedLine( $line, 'Identificador do tipo de entidade não reconhecido');
 				
@@ -154,7 +96,168 @@ class Processor {
 	
 	}
 	
-	private function saleslmanExists( $name ) : bool {
+	private function processSalesman( string $line ) : ?Salesman {
+	
+		$data = explode( ',', $line );
+		
+		if ( count( $data) != 4 ) {
+			
+			$this->setFailedLine($line, 'O registro não está no formato esperado.');
+			
+		} else {
+		
+			$salesman = new Salesman($data[1], $data[2], floatval($data[3]));
+			
+			if ( !empty( $salesman->getErrors() ) ) {
+				foreach ($salesman->getErrors() as $error) {
+					$this->setFailedLine($line, $error);
+				}
+			} else {
+				return $salesman;
+			}
+		
+		}
+		
+		return null;
+		
+	}
+	
+	private function processCustomer( string $line ) : ?Customer {
+		
+		$data = explode( ',', $line );
+	
+		if ( count( $data ) != 4) {
+	
+			$this->setFailedLine($line, 'O registro não está no formato esperado.');
+	
+		} else {
+	
+			$customer = new Customer($data[1], $data[2], $data[3] );
+			if ( !empty( $customer->getErrors() ) ) {
+				foreach ($customer->getErrors() as $error) {
+					$this->setFailedLine($line, $error);
+				}
+			} else {
+				return $customer;
+			}
+		}
+		
+		return null;
+	
+	}
+	
+	private function processSaleItem( string $line ) : ?SaleItem {
+	
+		$data = explode( '-', $line );
+		
+		if ( count( $data ) != 3) {
+			
+			$this->setFailedLine($line, 'O registro não está no formato esperado.');
+			
+		} else {
+			
+			$saleItem = new SaleItem( intval($data[0]), intval($data[1]), floatval($data[2]));
+			if ( !empty( $saleItem->getErrors() ) ) {
+				foreach ($saleItem->getErrors() as $error) {
+					$this->setFailedLine($line, $error);
+				}
+			} else {
+				return $saleItem;
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
+	private function getSaleItems( string $line ) : ?array {
+	
+		$itemsLine = $this->getSaleItemsLine( $line );
+		$items = [];
+		
+		if ( !is_null( $itemsLine) ) {
+		
+			$itemsGroup = explode(',', $itemsLine);
+			foreach ($itemsGroup as $item) {
+		
+				$saleItem = $this->processSaleItem($item);
+		
+				if (is_a($saleItem, 'SaleItem')) {
+					array_push($items, $saleItem);
+				}
+				
+			}
+			
+		}
+		
+		return $items;
+		
+	}
+	
+	private function getSaleItemsLine( string $line ) : ?string {
+//		$line = '003,15,1-30-100, 2-30-2.50, 3-40-3.10 ,Manolo';
+		$items = null;
+		$itemsStart = strpos($line, '[');
+		$itemsEnd = strpos( $line, ']');
+		
+		if ( $itemsStart && $itemsEnd ) {
+			$start = $itemsStart + 1;
+			$end = $itemsEnd - $itemsStart;
+			$items = substr( $line, $start, $end );
+		}
+		
+		return $items;
+		
+	}
+	
+	private function processSale( string $line ) : ?Sale {
+		
+		$items = $this->getSaleItems( $line );
+		$itemsLine = $this->getSaleItemsLine( $line );
+
+		// Os dados são verificado sem os itens, pois estes já foram processados
+		$data = explode( ',', str_replace($itemsLine, '', $line) );
+
+		if ( count( $data ) != 4) {
+
+			$this->setFailedLine($line, 'O registro não está no formato esperado.');
+
+		} elseif ( is_null( $items ) ) {
+
+			$this->setFailedLine($line, 'As vendas não foram informadas corretamente.');
+
+		} elseif ( !is_numeric($data[1] ) ) {
+
+			$this->setFailedLine( $line, 'O identificador da venda deve ser um número inteiro.');
+			
+		} elseif ( !$this->salesmanExists( $data[3] ) ) {
+
+			$this->setFailedLine($line, 'O vendedor ' . $data[3] . ' não está cadastrado no sistema');
+
+		} else {
+
+			$sale = new Sale(intval($data[1]), $items, $data[3] );
+
+			if ( !empty($sale->getErrors() ) ) {
+
+				foreach ($sale->getErrors() as $error) {
+					$this->setFailedLine($line, $error);
+				}
+				
+			} else {
+
+				array_push($this->salesList, $sale);
+				return $sale;
+			}
+
+		}
+		
+		return null;
+		
+	}
+	
+	private function salesmanExists( $name ) : bool {
 		
 		foreach ( $this->salesmenList as $list => $salesman ) {
 			
@@ -168,12 +271,6 @@ class Processor {
 	
 	}
 	
-	private function processSaleItems( string $saleItems ) : array {
-		
-		return [];
-	
-	}
-	
 	private function getCustomersQuantity() : int {
 		return count( $this->customersList );
 	}
@@ -183,13 +280,41 @@ class Processor {
 	}
 	
 	private function getSalesmenAverageWage() : float {
-		return $this->getSalesmenQuantity() == 0 ? 0 : $this->salesmenSalarySum / $this->getSalesmenQuantity();
+		if ( $this->getSalesmenQuantity() > 0 ) {
+			return number_format( $this->salesmenSalarySum / $this->getSalesmenQuantity(), 2, '.', '');
+		}
+		return 0;
 	}
 	
 	private function getMostExpensiveSale() : float {
 		return $this->getSalesmenQuantity() == 0 ? 0 : $this->mostExpensiveSale;
 	}
 	
+
+	private function getSuccessLines() : string {
+		$info = '';
+		foreach ( $this->successLines as $line ) {
+			$info .= $line . '
+';
+		}
+		return $info;
+	}
+	
+	private function getFailedLines() : string {
+		$info = '';
+		foreach ( $this->failedLines as $fail => $errors ) {
+			$info .= trim( $fail ) . '
+';
+			foreach ( $errors as $error => $desc ) {
+				$info .= '- ' . $desc . '
+';
+			}
+			$info .= '
+';
+		}
+		return $info;
+	}
+
 	public function getProcessReport() : string {
 		
 		$report = '|RELATÓRIO|
@@ -199,31 +324,24 @@ Média salarial dos vendedores: ' . $this->getSalesmenAverageWage() . '
 Venda mais cara: ' . 'TODO
 Vendedor menos produtivo: ' . 'TODO
 
---------------------------------
+------------------------------------------------------------------------------------------------
+Linhas processadas: ' . count( $this->successLines ) . '
+
+'.
+
+$this->getSuccessLines()
+.
+'
+------------------------------------------------------------------------------------------------
 Linhas não processadas: ' . count( $this->failedLines ) . '
 
-';
-
-		foreach ( $this->failedLines as $fail => $errors ) {
-			
-			$report .= trim( $fail);
-			
-			foreach ($errors as $error => $desc) {
-		
-				$report .= '
-- ' .$desc;
-			
-			}
-
-			$report .= '
-			
-';
-		}
+' .
+$this->getFailedLines();
 		
 		// DEBUG! REMOVER OU COMENTAR!!!!
-//		echo '<pre>' . $report;
-//
-//		dd( $this->salesList);
+		echo '<pre>' . $report;
+		
+		dd( $this->salesList);
 		
 		return $report;
 	

@@ -9,7 +9,7 @@ class Customer extends Model {
 	private $businessArea = '';
 	
 	
-	public function __construct( $cnpj, $name, $businessArea ) {
+	public function __construct( string $cnpj, string $name, string $businessArea ) {
 		
 		$this->setCnpj( $cnpj );
 		$this->setName( $name );
@@ -24,10 +24,10 @@ class Customer extends Model {
 	public function setCnpj(string $cnpj): void {
 		
 		if ( strlen( $cnpj) != 14 )
-			$this->setError( 'CNPJ inválido: ' . $cnpj . ' não possui a quantidade de caracteres de um CNPJ');
+			$this->setError( 'CNPJ inválido: ' . $cnpj . ' não possui a quantidade de caracteres de um CNPJ.');
 		
 		if ( !ctype_digit( $cnpj) )
-			$this->setError( 'CNPJ inválido: ' . $cnpj . ' não possui apenas números');
+			$this->setError( 'CNPJ inválido: ' . $cnpj . ' não possui apenas números.');
 		
 		$this->cnpj = $cnpj;
 	}

@@ -9,12 +9,12 @@ class Sale extends Model {
 	private $salesmanId = '';
 	
 
-	public function __construct( $id, $items, $salesmanId ) {
+	public function __construct( int $id, array $items, string $salesmanId ) {
 		
-		$this->setId( intval( $id ) );
+		$this->setId( $id );
 		$this->setItems( $items );
 		$this->setSalesmanId( $salesmanId );
-		// Verificar com o líder se é para ser o ID ou apenas o nome (como entregue no arquivo de referência).
+		// Verificar com o requerente se é para ser o ID ou apenas o nome (como entregue no arquivo de referência).
 	
 	}
 	

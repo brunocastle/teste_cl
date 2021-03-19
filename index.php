@@ -1,6 +1,7 @@
 <?php
 	
 	date_default_timezone_set('America/Sao_Paulo');
+	header("Content-type: text/html; charset=utf-8");
 	
 	require_once 'core/config.php';
 	require_once 'core/utils.php';

@@ -8,8 +8,10 @@ class SaleItem extends Model {
 	private $quantity = 0;
 	private $price = 0.0;
 	
-	public function __construct( $id, $quantity, $price ) {
-	
+	public function __construct( int $id, int $quantity, float $price ) {
+		$this->id = $id;
+		$this->quantity = $quantity;
+		$this->price = $price;
 	}
 	
 	public function getId(): int {
