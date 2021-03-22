@@ -151,9 +151,8 @@ class FileHandler {
 		
 		}
 		
-		
-		// DEBUG! REMOVER OU COMENTAR!!!!
-		$link = '<a href="process.php?file='. $file . '" class="btn btn-sm btn-secondary">Processar</a>';
+//		// DEBUG! REMOVER OU COMENTAR!!!!
+//		$link = '<a href="process.php?file='. $file . '" class="btn btn-sm btn-secondary">Processar</a>';
 		
 		return $link;
 	

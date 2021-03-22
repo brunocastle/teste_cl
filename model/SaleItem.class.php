@@ -27,7 +27,12 @@ class SaleItem extends Model {
 	}
 	
 	public function setQuantity(int $quantity): void {
+
+		if ( !ctype_digit( $quantity ) )
+			$this->setError( 'Quantidade inválida: ' . $quantity . ' não possui apenas números.');
+		
 		$this->quantity = $quantity;
+		
 	}
 
 	public function getPrice(): float {
@@ -35,7 +40,12 @@ class SaleItem extends Model {
 	}
 	
 	public function setPrice(float $price): void {
+		
+		if ( !ctype_digit( $price ) )
+			$this->setError( 'Preço inválido: ' . $price . ' não possui apenas números.');
+		
 		$this->price = $price;
+		
 	}
 	
 	

@@ -12,7 +12,8 @@ class Processor {
 	private $salesList = [];
 	
 	private $salesmenSalarySum = 0.0;
-	private $mostExpensiveSale = 0;
+	
+	private $mostExpensiveSale = ['value' => 0.0, 'id' => 0, 'salesman' => '' ];
 	private $worstSalesman = '';
 	
 	public $successLines = [];
@@ -248,6 +249,11 @@ class Processor {
 			} else {
 
 				array_push($this->salesList, $sale);
+				if ( $this->mostExpensiveSale['value'] <= $sale->getSaleValue() ) {
+					$this->mostExpensiveSale['value'] = $sale->getSaleValue();
+					$this->mostExpensiveSale['id'] = $sale->getId();
+					$this->mostExpensiveSale['salesman'] = $sale->getSalesmanId();
+				}
 				return $sale;
 			}
 
@@ -286,10 +292,34 @@ class Processor {
 		return 0;
 	}
 	
-	private function getMostExpensiveSale() : float {
-		return $this->getSalesmenQuantity() == 0 ? 0 : $this->mostExpensiveSale;
+	private function getMostExpensiveSale() : string {
+		return $this->getSalesmenQuantity() == 0 ? 0 : 'Venda #' .$this->mostExpensiveSale['id'] . ', no valor de R$ ' . $this->mostExpensiveSale['value'] . ' por ' . $this->mostExpensiveSale['salesman'];
 	}
 	
+	private function getWorstSalesman() : string {
+		
+		$salesmen = [];
+		
+		// Preenche um array com os nomes dos vendedores como indexes, e valor float zero para todos.
+		foreach ( $this->salesmenList as $saleman ) {
+			if( !isset( $salesmen[ $saleman->getName() ] )) {
+				$salesmen[ $saleman->getName() ] = 0.0;
+			}
+		}
+		
+		// Aplica o valor somado de todas as vendas dos vendedores indexados
+		// OBS: Os indexes não precisam ser verificados nesta parte,
+		// pois vendas com nomes de vendedores que não existem, não são cadastradas.
+		foreach ( $this->salesList as $sale ) {
+			$salesmen[ $sale->getSalesmanid() ] += $sale->getSaleValue();
+		}
+		
+		//Organiza os valores das vendas somadas do maior para o menor e retorna o índice do valor mais baixo como pior vendedor
+		//OBS: Verificar com a liderança o que fazer em caso de empates
+		arsort( $salesmen );
+		return array_key_last( $salesmen);
+	
+	}
 
 	private function getSuccessLines() : string {
 		$info = '';
@@ -321,8 +351,8 @@ class Processor {
 Quantidade de clientes: ' . $this->getCustomersQuantity() . '
 Quantidade de vendedores: ' . $this->getSalesmenQuantity() . '
 Média salarial dos vendedores: ' . $this->getSalesmenAverageWage() . '
-Venda mais cara: ' . 'TODO
-Vendedor menos produtivo: ' . 'TODO
+Venda mais cara: ' . $this->getMostExpensiveSale() . '
+Vendedor menos produtivo: ' . $this->getWorstSalesman() . '
 
 ------------------------------------------------------------------------------------------------
 Linhas processadas: ' . count( $this->successLines ) . '
@@ -338,10 +368,10 @@ Linhas não processadas: ' . count( $this->failedLines ) . '
 ' .
 $this->getFailedLines();
 		
-		// DEBUG! REMOVER OU COMENTAR!!!!
-		echo '<pre>' . $report;
-		
-		dd( $this->salesList);
+//		// DEBUG! REMOVER OU COMENTAR!!!!
+//		echo '<pre>' . $report;
+//
+//		dd();
 		
 		return $report;
 	
