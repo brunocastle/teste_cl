@@ -42,9 +42,6 @@ class Sale extends Model {
 		$this->salesmanId = $salesmanId;
 	}
 	
-	/**
-	 * @return float
-	 */
 	public function getSaleValue(): float {
 		$saleValue = 0;
 		

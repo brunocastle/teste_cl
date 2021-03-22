@@ -143,7 +143,7 @@ class FileHandler {
 		
 		if ( file_exists( $reportPath . $doneFileName )) {
 		
-			$link = self::getLinkButton( $reportPath, $doneFileName, 'Download', 'btn-success' );
+			$link = self::getLinkButton( $reportPath, $doneFileName, 'Relatório', 'btn-success' );
 			
 		} else {
 		

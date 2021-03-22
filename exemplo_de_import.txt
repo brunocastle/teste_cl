@@ -1,0 +1,30 @@
+001,1234567891234,Steve,80000
+003,18,[1-25-750, 2-15-620.50, 3-10-900.67, 4-5-1206.23, 5-10-843.65] ,Vendedor Apelão
+003,19,[1-30-100, 2-30-2.50, 3-40-3.10] ,Bruno
+
+001,3245678865434,Elias,60000.99
+001,12345678901,Bruno,75000.69
+001,120.230.231-01,Manolo,32000
+001,DocTexto,Andróide 18,Quarenta e Tres Mil Reais
+
+003,15,1-30-100, 2-30-2.50, 3-40-3.10 ,Manolo
+001,SDASD12124,BUGADÃO
+002,TextoNoCNPJ,Casa do Container, Imobiliária
+002,56789012345678,O Senhor dos Anéis, Joalheria
+002,12345678901234,La Casa de Papel, Papelaria e Material Escolar
+003,DESESSEIS,[1-30-100, 2-30-2.50, 3-40-3.10] ,Henrique
+
+003,17,[1-35-120, 2-15-7.50, 3-10-4.60, 4-5-5] ,Manolo
+002,71235875695173,Elma Chips, Equipamentos Eletrônicos
+003,11,[1-15-200, 2-50-2.50] ,Bruno
+003,12,[1-20-100, 2-80-0.50, 3-40-3.10] ,João
+
+001,090.771.191-20,Pedro?/\*!',90000
+002,2345675434544345,Rita Ruggs,Rural
+002,2345675433444345,Dianne Bragg
+001,74125896321,Vendedor Apelão,352685.25
+001,01234567890,Vendedor Fraquinho,10000
+003,13.5,[1-30-100, 2-30-2.50, 3-40-3.10] ,Manolo
+003,14,[1-30-100, 2-30-2.50, 3-40-3.10] ,Andróide 18
+
+

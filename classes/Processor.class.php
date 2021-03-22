@@ -14,7 +14,6 @@ class Processor {
 	private $salesmenSalarySum = 0.0;
 	
 	private $mostExpensiveSale = ['value' => 0.0, 'id' => 0, 'salesman' => '' ];
-	private $worstSalesman = '';
 	
 	public $successLines = [];
 	public $failedLines = [];
@@ -293,7 +292,7 @@ class Processor {
 	}
 	
 	private function getMostExpensiveSale() : string {
-		return $this->getSalesmenQuantity() == 0 ? 0 : 'Venda #' .$this->mostExpensiveSale['id'] . ', no valor de R$ ' . $this->mostExpensiveSale['value'] . ' por ' . $this->mostExpensiveSale['salesman'];
+		return $this->getSalesmenQuantity() == 0 ? 0 : 'Venda #' .$this->mostExpensiveSale['id'] . ', no valor de R$ ' . $this->mostExpensiveSale['value'] . '. A venda foi executada por ' . $this->mostExpensiveSale['salesman'];
 	}
 	
 	private function getWorstSalesman() : string {
@@ -350,7 +349,7 @@ class Processor {
 		$report = '|RELATÓRIO|
 Quantidade de clientes: ' . $this->getCustomersQuantity() . '
 Quantidade de vendedores: ' . $this->getSalesmenQuantity() . '
-Média salarial dos vendedores: ' . $this->getSalesmenAverageWage() . '
+Média salarial dos vendedores: R$ ' . $this->getSalesmenAverageWage() . '
 Venda mais cara: ' . $this->getMostExpensiveSale() . '
 Vendedor menos produtivo: ' . $this->getWorstSalesman() . '
 

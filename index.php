@@ -46,14 +46,15 @@
 					<table class="table text-center">
 						<thead class="thead-light">
 							<tr>
-								<th scope="col">Arquivos</th>
+								<th scope="col">Arquivo</th>
+								<th scope="col">Download</th>
 							</tr>
 						</thead>
 						<tbody>';
 							
 							foreach ( $files as $file ) {
 								
-								echo '<tr><td>' . $file . ' ' . FileHandler::getLinkButton($path, $file, 'Download' ) . ' ';
+								echo '<tr><td>' . $file . '</td><td> ' . FileHandler::getLinkButton($path, $file, 'Arquivo Original' ) . ' ';
 								
 								echo FileHandler::getReportLinkButton( $file ) . '</td></tr>';
 									
